@@ -1,7 +1,8 @@
 const Influx = require('influx'),
     config = require('config'),
     cron = require('node-cron'),
-    DarkSky = require('darksky-node/lib/darksky-api')
+    DarkSky = require('darksky-node/lib/darksky-api'),
+    moment = require('moment')
 
 const generalConfig = config.get('general'),
     influxConfig = config.get('influxdb'),
@@ -31,10 +32,15 @@ const influx = new Influx.InfluxDB({
                 cloud_cover: Influx.FieldType.FLOAT,
                 pressure: Influx.FieldType.FLOAT,
                 ozone: Influx.FieldType.FLOAT,
+                uv_index: Influx.FieldType.FLOAT,
+                visibility: Influx.FieldType.FLOAT,
                 precip_intensity: Influx.FieldType.FLOAT,
                 precip_probability: Influx.FieldType.FLOAT,
                 nearest_storm_distance: Influx.FieldType.FLOAT,
-                nearest_storm_bearing: Influx.FieldType.FLOAT
+                nearest_storm_bearing: Influx.FieldType.FLOAT,
+                sunrise_time: Influx.FieldType.INTEGER,
+                sunset_time: Influx.FieldType.INTEGER,
+                sun: Influx.FieldType.BOOLEAN
             }
         }
     ]
@@ -44,7 +50,7 @@ const darksky = new DarkSky(darkskyConfig.key);
 
 var getForecast = function () {
     darksky.forecast(darkskyConfig.latitude, darkskyConfig.longitude, {
-        exclude: ['minutely', 'hourly', 'daily', 'alerts', 'flags'],
+        exclude: ['minutely', 'hourly', 'alerts', 'flags'],
         units: darkskyConfig.units
     }, function (err, responseBody) {
         if (err) {
@@ -58,6 +64,21 @@ var getForecast = function () {
             }
 
             var current = forecast.currently;
+            var daily = forecast.daily.data[0];
+            var sun_status = 0;
+
+            if (generalConfig.debug) {
+                console.log("Sunrise: ", daily.sunriseTime);
+                console.log("Sunset: ", daily.sunsetTime);
+                console.log("Now: ", moment().unix());
+            }
+
+            if(moment().unix() > daily.sunriseTime && moment().unix() < daily.sunsetTime)
+                sun_status = 1;
+
+            if (generalConfig.debug)
+                console.log("Sun Status: ", sun_status);
+
             const points = [
                 {
                     measurement: 'weather',
@@ -71,10 +92,16 @@ var getForecast = function () {
                         cloud_cover: current.cloudCover,
                         pressure: current.pressure,
                         ozone: current.ozone,
+                        uv_index: current.uvIndex,
+                        visibility: current.visibility,
                         precip_intensity: current.precipIntensity,
                         precip_probability: current.precipProbability,
                         nearest_storm_distance: current.nearestStormDistance,
                         nearest_storm_bearing: current.nearestStormBearing,
+
+                        sunrise_time: daily.sunriseTime,
+                        sunset_time: daily.sunsetTime,
+                        sun: sun_status,
                     },
                     tags: {
                         source: 'darksky'
