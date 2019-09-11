@@ -1,7 +1,7 @@
 const Influx = require('influx'),
     config = require('config'),
     cron = require('node-cron'),
-    DarkSky = require('darksky-node/lib/darksky-api'),
+    DarkSky = require('darksky-node/lib/darksky-api')
 
 const generalConfig = config.get('general'),
     influxConfig = config.get('influxdb'),
