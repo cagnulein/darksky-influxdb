@@ -65,7 +65,7 @@ var getForecast = function () {
             var current = forecast.currently;
             var daily = forecast.daily.data[0];
             var moment = (new Date()).getTime() / 1000;
-            var sun_status = 0;
+            var sunStatus = 0;
 
             if (generalConfig.debug) {
                 console.log("Sunrise: ", daily.sunriseTime);
@@ -74,10 +74,10 @@ var getForecast = function () {
             }
 
             if(moment > daily.sunriseTime && moment < daily.sunsetTime)
-                sun_status = 1;
+                sunStatus = 1;
 
             if (generalConfig.debug)
-                console.log("Sun Status: ", sun_status);
+                console.log("Sun Status: ", sunStatus);
 
             const points = [
                 {
@@ -101,7 +101,7 @@ var getForecast = function () {
 
                         sunrise_time: daily.sunriseTime,
                         sunset_time: daily.sunsetTime,
-                        sun: sun_status,
+                        sun: sunStatus,
                     },
                     tags: {
                         source: 'darksky'
