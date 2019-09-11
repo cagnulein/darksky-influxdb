@@ -2,7 +2,6 @@ const Influx = require('influx'),
     config = require('config'),
     cron = require('node-cron'),
     DarkSky = require('darksky-node/lib/darksky-api'),
-    moment = require('moment')
 
 const generalConfig = config.get('general'),
     influxConfig = config.get('influxdb'),
@@ -65,15 +64,16 @@ var getForecast = function () {
 
             var current = forecast.currently;
             var daily = forecast.daily.data[0];
+            var moment = (new Date()).getTime() / 1000;
             var sun_status = 0;
 
             if (generalConfig.debug) {
                 console.log("Sunrise: ", daily.sunriseTime);
                 console.log("Sunset: ", daily.sunsetTime);
-                console.log("Now: ", moment().unix());
+                console.log("Now: ", moment);
             }
 
-            if(moment().unix() > daily.sunriseTime && moment().unix() < daily.sunsetTime)
+            if(moment > daily.sunriseTime && moment < daily.sunsetTime)
                 sun_status = 1;
 
             if (generalConfig.debug)
