@@ -39,7 +39,7 @@ const influx = new Influx.InfluxDB({
                 nearest_storm_bearing: Influx.FieldType.FLOAT,
                 sunrise_time: Influx.FieldType.INTEGER,
                 sunset_time: Influx.FieldType.INTEGER,
-                sun: Influx.FieldType.BOOLEAN
+                sun_status: Influx.FieldType.INTEGER
             }
         }
     ]
@@ -65,7 +65,7 @@ var getForecast = function () {
             var current = forecast.currently;
             var daily = forecast.daily.data[0];
             var moment = (new Date()).getTime() / 1000;
-            var sunStatus = new Boolean(0);
+            var sunStatus = 0;
 
             if (generalConfig.debug) {
                 console.log("Sunrise: ", daily.sunriseTime);
@@ -74,7 +74,7 @@ var getForecast = function () {
             }
 
             if(moment > daily.sunriseTime && moment < daily.sunsetTime)
-                sunStatus = true;
+                sunStatus = 1;
 
             if (generalConfig.debug)
                 console.log("Sun Status: ", sunStatus);
@@ -101,7 +101,7 @@ var getForecast = function () {
 
                         sunrise_time: daily.sunriseTime,
                         sunset_time: daily.sunsetTime,
-                        sun: sunStatus,
+                        sun_status: sunStatus,
                     },
                     tags: {
                         source: 'darksky'
