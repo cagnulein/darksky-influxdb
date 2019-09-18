@@ -65,7 +65,7 @@ var getForecast = function () {
             var current = forecast.currently;
             var daily = forecast.daily.data[0];
             var moment = (new Date()).getTime() / 1000;
-            var sunStatus = False;
+            var sunStatus = new Boolean(0);
 
             if (generalConfig.debug) {
                 console.log("Sunrise: ", daily.sunriseTime);
@@ -74,7 +74,7 @@ var getForecast = function () {
             }
 
             if(moment > daily.sunriseTime && moment < daily.sunsetTime)
-                sunStatus = True;
+                sunStatus = true;
 
             if (generalConfig.debug)
                 console.log("Sun Status: ", sunStatus);
